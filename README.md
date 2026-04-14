@@ -12,6 +12,16 @@ I'm a Software Integration Engineer with experience designing and building enter
 
 **Core stack:** MuleSoft Anypoint Platform · DataWeave 2.0 · RESTful APIs · EDI X12 · SOQL · XML / JSON / CSV · CloudHub · GitHub Actions (CI/CD)
 
+## Overview
+
+This project simulates an enterprise logistics data integration platform designed to automate data exchange between transportation management systems.
+
+It demonstrates real-world patterns such as:
+- API-based system integration
+- Data transformation pipelines
+- Workflow automation
+- Queue-based processing (if applicable)
+
 ---
 
 ## 📁 Project Index
