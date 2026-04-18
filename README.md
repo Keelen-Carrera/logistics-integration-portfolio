@@ -63,7 +63,7 @@ It demonstrates real-world patterns such as:
 
 ### Overview
 
-When a new carrier, customer, or vendor account is created in a Transportation Management System (TMS), it needs to be reflected in the freight ERP as an **Organization record**. This integration polls the TMS on a schedule, maps the account structure to a generic ERP XML schema, and POSTs it via the ERP's HTTP API. After a successful creation, the ERP's response is parsed and a reference key is written back to the TMS to link the two records bidirectionally.
+When a new carrier, customer, or vendor account is created in a Transportation Management System (TMS), it needs to be reflected in the freight ERP as an **Organization record**. This simulated integration demonstrates a polling pattern, maps the account structure to a generic ERP XML schema, and POSTs it via the ERP's HTTP API. After a successful creation, the ERP's response is parsed and a reference key is written back to the source system to link the two records bidirectionally.
 
 ### Architecture
 
@@ -128,6 +128,10 @@ When a new carrier, customer, or vendor account is created in a Transportation M
   ]
 }
 ```
+
+- ***The input is stored as a "payload" that can be used throughout the entire MuleSoft project***
+
+#### Transformation logic is simplified and generalized to demonstrate approach rather than replicate any real implementation.
 
 **DataWeave Transformation (`map-account-to-org.dwl`):**
 ```dataweave
@@ -600,20 +604,21 @@ Sends shipment status updates to a trading partner in **ANSI X12 214 (Transporta
 │  [Scheduler]                                                    │
 │      │                                                          │
 │      ▼                                                          │
-│  [HTTP GET] ──────► ERP shipment events endpoint               │
+│  [HTTP GET] ──────► ERP shipment events endpoint                │
 │      │                                                          │
 │      ▼                                                          │
-│  [Filter] ─────────► Events with qualifying status codes only  │
+│  [Filter] ─────────► Events with qualifying status codes only   │
 │      │                                                          │
 │      ▼                                                          │
-│  [Transform: DWL] ──► Map ERP event → X12 214 segment string  │
+│  [Transform: DWL] ──► Map ERP event → X12 214 segment string    │
 │      │                                                          │
 │      ▼                                                          │
-│  [SFTP Write] ─────► Drop .edi file to partner SFTP folder    │
+│  [SFTP Write] ─────► Drop .edi file to partner SFTP folder      │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
 ### EDI 214 Segment Reference (all dummy values)
+#### Sample EDI payload is illustrative and does not reflect any real trading partner configuration.
 
 ```
 ISA*00*          *00*          *ZZ*SENDERID       *ZZ*RECEIVERID     *240615*1200*^*00501*000000042*0*P*>~
@@ -868,6 +873,8 @@ var crmCodes  = vars.crmCompanies map $.erpOrgCode
 ### Overview
 
 A GitHub Actions workflow that automates testing and deployment of MuleSoft integration projects across three environments — **dev**, **test**, and **prod** — using the MuleSoft Maven plugin and CloudHub 2.0. Feature branch pushes deploy to dev automatically. Merges to `main` deploy to test. Production requires a manual approval gate.
+
+The following CI/CD structure is a conceptual example and does not reflect any real organization’s pipeline configuration.
 
 ### Branch & Environment Strategy
 
@@ -1422,4 +1429,4 @@ jobs:
 
 ---
 
-***Built by Keelen Carrera · [LinkedIn](https://linkedin.com/in/keelencarrera) · Houston, TX***
+**Built by Keelen Carrera · [LinkedIn](https://linkedin.com/in/keelencarrera) · Houston, TX**
