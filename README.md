@@ -1,4 +1,4 @@
-# 🔄 Logistics Integration Portfolio
+# Logistics Integration Portfolio
 
 > **A collection of integration architecture patterns and data transformation examples inspired by real-world enterprise logistics system design.**
 >
