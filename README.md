@@ -1430,3 +1430,11 @@ jobs:
 ---
 
 **Built by Keelen Carrera · [LinkedIn](https://linkedin.com/in/keelencarrera) · Houston, TX**
+
+---
+ 
+## License
+ 
+Copyright (c) 2026 Keelen Carrera
+ 
+This project is licensed under the [MIT License](LICENSE). You are free to view and learn from the code, but all original work — including integration architecture, DataWeave transformations, and design patterns — remains the intellectual property of Keelen Carrera. Attribution is required for any derivative work.
