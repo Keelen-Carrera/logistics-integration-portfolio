@@ -8,7 +8,7 @@
 
 ## 👤 About
 
-I'm a Software Integration Engineer with experience designing and building enterprise data pipelines across Transportation Management Systems (TMS), Freight ERP platforms, CRM tools, EDI trading partners, and warehouse systems. My work sits at the intersection of **systems integration**, **data transformation**, and **secure API design** — with a focus on logistics and supply chain operations.
+I'm a Software Integration Engineer with experience designing and building enterprise data pipelines across Transportation Management Systems (TMS), Freight ERP platforms, CRM tools, EDI trading partners, and warehouse systems. My work sits at the intersection of **systems integration**, **data transformation**, and **secure API design**, with a focus on logistics and supply chain operations.
 
 **Core stack:** MuleSoft Anypoint Platform · DataWeave 2.0 · RESTful APIs · EDI X12 · SOQL · XML / JSON / CSV · CloudHub · GitHub Actions (CI/CD)
 
@@ -17,12 +17,14 @@ I'm a Software Integration Engineer with experience designing and building enter
 ## Architecture
 
 System Components:
+
 - Source System (Simulated TMS)
 - Integration Layer (API + Processing Logic)
 - Transformation Engine
 - Target System (Simulated ERP / Logistics Platform)
 
 Data Flow:
+
 1. Incoming data is received via API or file ingestion
 2. Data is validated and parsed
 3. Transformation logic maps fields across systems
@@ -35,6 +37,7 @@ Data Flow:
 This project simulates an enterprise logistics data integration platform designed to automate data exchange between transportation management systems.
 
 It demonstrates real-world patterns such as:
+
 - API-based system integration
 - Data transformation pipelines
 - Workflow automation
@@ -95,11 +98,12 @@ When a new carrier, customer, or vendor account is created in a Transportation M
 
 - **Watermarking:** The query filters by `createdAt >= last_run_timestamp` using a value stored in the Mule Object Store, ensuring only net-new accounts are processed on each run.
 - **Idempotency guard:** An `erpReferenceId` field check prevents re-processing accounts that already have an ERP reference.
-- **Response writeback:** After a successful ERP POST, the generated Organization code is extracted from the response and written back to the TMS — linking the two systems bidirectionally.
+- **Response writeback:** After a successful ERP POST, the generated Organization code is extracted from the response and written back to the TMS, linking the two systems bidirectionally.
 
 ### DataWeave: Account → ERP Organization XML
 
 **Input (dummy TMS account data):**
+
 ```json
 {
   "id": "ACC-001",
@@ -131,9 +135,10 @@ When a new carrier, customer, or vendor account is created in a Transportation M
 
 - ***The input is stored as a "payload" that can be used throughout the entire MuleSoft project***
 
-#### Transformation logic is simplified and generalized to demonstrate approach rather than replicate any real implementation.
+#### Transformation logic is simplified and generalized to demonstrate approach rather than replicate any real implementation
 
 **DataWeave Transformation (`map-account-to-org.dwl`):**
+
 ```dataweave
 %dw 2.0
 output application/xml writeDeclaration=false
@@ -178,11 +183,12 @@ FreightOrganization: {
 ```
 
 **DataWeave: Parse ERP Response & Update TMS (`update-account-ref.dwl`):**
+
 ```dataweave
 %dw 2.0
 output application/json skipNullOn="everywhere"
 import * from dw::core::Strings
-// ERP processing log uses pipe-delimited entries — split and filter for errors
+// ERP processing log uses pipe-delimited entries, split and filter for errors
 var logLines = (payload.processingLog substringBy $ == "|")
 ---
 {
@@ -203,7 +209,7 @@ var logLines = (payload.processingLog substringBy $ == "|")
 
 ### Overview
 
-When a load (a domestic freight movement with origin, destination, carrier, and cargo details) is finalized in the TMS, this integration creates a corresponding **Shipment record** in the freight ERP — including stop details, cargo line items, carrier financials, and port/location codes.
+When a load (a domestic freight movement with origin, destination, carrier, and cargo details) is finalized in the TMS, this integration creates a corresponding **Shipment record** in the freight ERP, including stop details, cargo line items, carrier financials, and port/location codes.
 
 ### Architecture
 
@@ -237,6 +243,7 @@ When a load (a domestic freight movement with origin, destination, carrier, and 
 ### DataWeave: Load → ERP Shipment XML
 
 **Input (dummy load data):**
+
 ```json
 {
   "id": "LOAD-2024-00042",
@@ -289,6 +296,7 @@ When a load (a domestic freight movement with origin, destination, carrier, and 
 ```
 
 **DataWeave (`map-load-to-shipment.dwl`):**
+
 ```dataweave
 %dw 2.0
 output application/xml writeDeclaration=false
@@ -372,6 +380,7 @@ FreightShipment: {
 ```
 
 **DataWeave: Write Shipment + Consol Numbers Back (`update-load-ref.dwl`):**
+
 ```dataweave
 %dw 2.0
 output application/json skipNullOn="everywhere"
@@ -513,7 +522,7 @@ FreightStatusEvent: {
 }
 ```
 
-> **Note:** Delivery estimated and delivery actual follow the same pattern — `firstStop` becomes `lastStop`, and `pickup` action/event codes are replaced with `delivery` codes.
+> **Note:** Delivery estimated and delivery actual follow the same pattern, `firstStop` becomes `lastStop`, and `pickup` action/event codes are replaced with `delivery` codes.
 
 ### Status Update Response Parser (`parse-status-response.dwl`)
 
@@ -618,7 +627,8 @@ Sends shipment status updates to a trading partner in **ANSI X12 214 (Transporta
 ```
 
 ### EDI 214 Segment Reference (all dummy values)
-#### Sample EDI payload is illustrative and does not reflect any real trading partner configuration.
+
+#### Sample EDI payload is illustrative and does not reflect any real trading partner configuration
 
 ```
 ISA*00*          *00*          *ZZ*SENDERID       *ZZ*RECEIVERID     *240615*1200*^*00501*000000042*0*P*>~
@@ -776,6 +786,7 @@ output application/json
 ```
 
 **Sample alert output (dummy):**
+
 ```json
 {
   "errorDetails": {
@@ -794,6 +805,7 @@ output application/json
 ```
 
 **Global Error Handler (Mule XML):**
+
 ```xml
 <on-error-propagate type="ANY" enableNotifications="true" logException="true">
   <ee:transform>
@@ -817,7 +829,7 @@ output application/json
 
 ### Overview
 
-A data reconciliation utility that compares organization records between the CRM and the ERP to identify mismatches, inactive records, and orphaned entries — enabling clean bidirectional sync across large datasets.
+A data reconciliation utility that compares organization records between the CRM and the ERP to identify mismatches, inactive records, and orphaned entries, enabling clean bidirectional sync across large datasets.
 
 ### Reconciliation Logic
 
@@ -872,7 +884,7 @@ var crmCodes  = vars.crmCompanies map $.erpOrgCode
 
 ### Overview
 
-A GitHub Actions workflow that automates testing and deployment of MuleSoft integration projects across three environments — **dev**, **test**, and **prod** — using the MuleSoft Maven plugin and CloudHub 2.0. Feature branch pushes deploy to dev automatically. Merges to `main` deploy to test. Production requires a manual approval gate.
+A GitHub Actions workflow that automates testing and deployment of MuleSoft integration projects across three environments, **dev**, **test**, and **prod**, using the MuleSoft Maven plugin and CloudHub 2.0. Feature branch pushes deploy to dev automatically. Merges to `main` deploy to test. Production requires a manual approval gate.
 
 The following CI/CD structure is a conceptual example and does not reflect any real organization’s pipeline configuration.
 
@@ -929,6 +941,7 @@ logistics-integration-api/
 ### GitHub Actions: Deploy to Dev
 
 **`.github/workflows/deploy-dev.yml`**
+
 ```yaml
 name: Deploy to Dev
 
@@ -984,7 +997,7 @@ jobs:
             github.rest.issues.create({
               owner: context.repo.owner,
               repo:  context.repo.repo,
-              title: `Deploy Failed: dev — ${context.ref}`,
+              title: `Deploy Failed: dev, ${context.ref}`,
               body:  `Workflow run failed.\n\nRun: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
               labels: ['deployment-failure', 'dev']
             })
@@ -993,6 +1006,7 @@ jobs:
 ### GitHub Actions: Deploy to Test
 
 **`.github/workflows/deploy-test.yml`**
+
 ```yaml
 name: Deploy to Test
 
@@ -1055,7 +1069,7 @@ jobs:
             github.rest.issues.create({
               owner: context.repo.owner,
               repo:  context.repo.repo,
-              title: `Deploy Failed: test — ${context.sha.substring(0,7)}`,
+              title: `Deploy Failed: test, ${context.sha.substring(0,7)}`,
               body:  `MUnit tests or test deployment failed.\n\nCommit: ${context.sha}\nRun: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
               labels: ['deployment-failure', 'test']
             })
@@ -1064,6 +1078,7 @@ jobs:
 ### GitHub Actions: Deploy to Production (manual approval)
 
 **`.github/workflows/deploy-prod.yml`**
+
 ```yaml
 name: Deploy to Production
 
@@ -1132,7 +1147,7 @@ jobs:
             github.rest.issues.create({
               owner: context.repo.owner,
               repo:  context.repo.repo,
-              title: `🚨 PROD Deploy Failed — ${new Date().toISOString()}`,
+              title: `🚨 PROD Deploy Failed, ${new Date().toISOString()}`,
               body:  `Production deployment failed.\n\nTriggered by: @${context.actor}\nRun: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
               labels: ['deployment-failure', 'production', 'urgent']
             })
@@ -1141,7 +1156,7 @@ jobs:
 ### Environment Property Files
 
 ```yaml
-# src/main/resources/dev.yaml  (safe to commit — no real values, all injected at runtime)
+# src/main/resources/dev.yaml  (safe to commit, no real values, all injected at runtime)
 erp:
   host:     "${ERP_HOST}"
   port:     "${ERP_PORT}"
@@ -1194,7 +1209,7 @@ alerts:
 
 ### Overview
 
-A scheduled GitHub Actions workflow that acts as a lightweight **integration health monitor**. Every 30 minutes it calls the `/health` endpoint on each deployed Mule application, evaluates the response, and automatically opens a GitHub Issue if any flow is unhealthy — tagged by environment and severity. This eliminates the need to log into the Anypoint Platform console to discover a down integration.
+A scheduled GitHub Actions workflow that acts as a lightweight **integration health monitor**. Every 30 minutes it calls the `/health` endpoint on each deployed Mule application, evaluates the response, and automatically opens a GitHub Issue if any flow is unhealthy, tagged by environment and severity. This eliminates the need to log into the Anypoint Platform console to discover a down integration.
 
 ### How It Works
 
@@ -1248,6 +1263,7 @@ Each deployed Mule application exposes a `/health` endpoint that returns its sta
 ```
 
 **Sample healthy response:**
+
 ```json
 {
   "status":      "UP",
@@ -1261,6 +1277,7 @@ Each deployed Mule application exposes a `/health` endpoint that returns its sta
 ### GitHub Actions: Health Monitor
 
 **`.github/workflows/integration-health-monitor.yml`**
+
 ```yaml
 name: Integration Health Monitor
 
@@ -1380,6 +1397,7 @@ jobs:
 ### Auto-Close Resolved Issues
 
 **`.github/workflows/health-auto-close.yml`**
+
 ```yaml
 name: Auto-Close Resolved Health Issues
 
@@ -1421,9 +1439,9 @@ jobs:
 
 ## 🧠 Key Engineering Takeaways
 
-- **DataWeave is a full transformation language.** These scripts use conditional logic, pattern matching, `map` / `filter` / `groupBy`, string manipulation (`splitBy`, `substringBy`, `withMaxSize`), type coercion, dynamic XML attribute injection, and named variables — not drag-and-drop field mapping.
+- **DataWeave is a full transformation language.** These scripts use conditional logic, pattern matching, `map` / `filter` / `groupBy`, string manipulation (`splitBy`, `substringBy`, `withMaxSize`), type coercion, dynamic XML attribute injection, and named variables, not drag-and-drop field mapping.
 - **Integration is a systems problem.** Every project required understanding the full data model of two or more platforms, failure modes of scheduled vs. event-driven syncs, and strategies to keep records linked bidirectionally without duplicates.
-- **Error handling is a first-class feature.** Every flow surfaces structured error details — failing component, flow name, correlation ID, and environment — to make production debugging tractable without a platform console.
+- **Error handling is a first-class feature.** Every flow surfaces structured error details, failing component, flow name, correlation ID, and environment, to make production debugging tractable without a platform console.
 - **Logistics data is unpredictable.** Appointment windows arrive as ranges (`"08:00-12:00"`), optional fields need graceful fallbacks, unit codes vary between systems, and a single `null` can break an XML schema. Defensive DataWeave is non-negotiable.
 - **CI/CD and monitoring close the loop.** Building the integration is only half the job. Automated deployment pipelines, environment-scoped secrets, and proactive GitHub Issue alerting turn a collection of flows into a maintainable production system.
 
@@ -1432,9 +1450,9 @@ jobs:
 **Built by Keelen Carrera · [LinkedIn](https://linkedin.com/in/keelencarrera) · Houston, TX**
 
 ---
- 
+
 ## License
- 
+
 Copyright (c) 2026 Keelen Carrera
- 
-This project is licensed under the [MIT License](LICENSE). You are free to view and learn from the code, but all original work — including integration architecture, DataWeave transformations, and design patterns — remains the intellectual property of Keelen Carrera. Attribution is required for any derivative work.
+
+This project is licensed under the [MIT License](LICENSE). You are free to view and learn from the code, but all original work, including integration architecture, DataWeave transformations, and design patterns, remains the intellectual property of Keelen Carrera. Attribution is required for any derivative work.
